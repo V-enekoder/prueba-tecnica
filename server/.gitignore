@@ -1,5 +1,18 @@
-node_modules
-# Keep environment variables out of version control
+# Dependencias
+node_modules/
+.pnpm-debug.log*
+
+# Compilación de TypeScript
+dist/
+out/
+
+# Base de datos local (SQLite) - ¡Muy importante!
+prisma/dev.db
+prisma/dev.db-journal
+
+# Variables de entorno (Contienen contraseñas o URLs de DB)
 .env
 
-/generated/prisma
+# Archivos del sistema
+.DS_Store
+Thumbs.db
