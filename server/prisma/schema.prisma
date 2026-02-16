@@ -1,0 +1,32 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Client {
+  id           Int           @id @default(autoincrement())
+  name         String
+  phone        String        @unique // El teléfono identifica al cliente frecuente
+  isFrequent   Boolean       @default(true)
+  appointments Appointment[]
+  createdAt    DateTime      @default(now())
+}
+
+model Appointment {
+  id          Int     @id @default(autoincrement())
+  clientName  String
+  phoneNumber String?
+
+  start       DateTime
+  end         DateTime
+  serviceType String // 'Básico', 'Básico + Barba', 'Especial'
+  price       Float    @default(0)
+  attended    Boolean  @default(false)
+
+  clientId Int?
+  client   Client? @relation(fields: [clientId], references: [id])
+}
