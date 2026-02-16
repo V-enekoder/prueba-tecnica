@@ -1,6 +1,7 @@
 import { Clock, MessageCircle, TrendingUp } from "lucide-react";
 import { format } from "date-fns";
-import type { Appointment } from "../types"; // <--- Agregado 'type'
+import type { Appointment } from "../types";
+import { ClientSearch } from "./ClientSearch.tsx";
 
 interface Props {
   revenue: number;
@@ -14,6 +15,9 @@ export const Sidebar = (
   { revenue, totalCitas, pendingNext, onSelectEvent, onSendWhatsApp }: Props,
 ) => (
   <aside className="sidebar">
+    <div className="client-search-box">
+      <ClientSearch />
+    </div>
     <div className="stat-card">
       <h3>
         <TrendingUp size={18} /> Resumen de Hoy
