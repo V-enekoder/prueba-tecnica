@@ -1,0 +1,67 @@
+.custom-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 10px;
+    background: white;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 10px;
+}
+
+.toolbar-navigation,
+.toolbar-views {
+    display: flex;
+    gap: 8px;
+}
+
+.toolbar-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.toolbar-label h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    text-transform: capitalize;
+    color: var(--dark);
+}
+
+.calendar-icon {
+    color: var(--primary);
+}
+
+/* Botones */
+.custom-toolbar button {
+    padding: 8px 16px;
+    border: 1px solid #ddd;
+    background: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #666;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+}
+
+.custom-toolbar button:hover {
+    background: #f4f7f6;
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.custom-toolbar button.active {
+    background: var(--dark);
+    color: white;
+    border-color: var(--dark);
+}
+
+.btn-nav {
+    padding: 8px !important;
+}
+
+.btn-today {
+    margin-right: 5px;
+}

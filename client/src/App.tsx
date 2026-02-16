@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Calendar, dateFnsLocalizer } from "react-big-calendar";
+import { Calendar, dateFnsLocalizer, type View } from "react-big-calendar";
 import { format, getDay, isToday, parse, startOfWeek } from "date-fns";
 import esES from "date-fns/locale/es";
 import axios from "axios";
@@ -8,6 +8,7 @@ import type { Appointment } from "./types";
 import { AppointmentForm } from "./components/AppointmentForm";
 import { AppointmentDetails } from "./components/AppointmentDetails";
 import { Sidebar } from "./components/Sidebar";
+import { CustomToolbar } from "./components/CustomToolbar";
 
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "./App.css";
@@ -110,6 +111,10 @@ function App() {
     );
   };
 
+  const [view, setView] = useState<View>("month");
+
+  const [date, setDate] = useState(new Date());
+
   return (
     <div className="app-container">
       <header className="main-header">
@@ -130,6 +135,10 @@ function App() {
           <Calendar
             localizer={localizer}
             events={events}
+            view={view}
+            onView={(newView) => setView(newView)}
+            date={date}
+            onNavigate={(newDate) => setDate(newDate)}
             startAccessor="start"
             endAccessor="end"
             selectable
@@ -139,6 +148,24 @@ function App() {
             }}
             onSelectEvent={(event) => setSelectedEvent(event as Appointment)}
             culture="es"
+            components={{
+              toolbar: CustomToolbar,
+            }}
+            messages={{
+              allDay: "Todo el día",
+              previous: "Anterior",
+              next: "Siguiente",
+              today: "Hoy",
+              month: "Mes",
+              week: "Semana",
+              day: "Día",
+              agenda: "Agenda",
+              date: "Fecha",
+              time: "Hora",
+              event: "Evento",
+              noEventsInRange: "No hay citas en este rango",
+              showMore: (total) => `+ Ver más (${total})`,
+            }}
             style={{ height: "100%" }}
             eventPropGetter={(event: any) => {
               let bg = "#3174ad";
