@@ -3,6 +3,7 @@ import { Calendar, dateFnsLocalizer, type View } from "react-big-calendar";
 import { format, getDay, isToday, parse, startOfWeek } from "date-fns";
 import esES from "date-fns/locale/es";
 import axios from "axios";
+import { useMemo } from "react";
 
 import type { Appointment } from "./types";
 import { AppointmentForm } from "./components/AppointmentForm";
@@ -55,18 +56,28 @@ function App() {
     );
   };
 
-  const appointmentsToday = events.filter((e) =>
-    isToday(new Date(e.start as Date))
-  );
-  const revenueToday = appointmentsToday.filter((e) => e.attended).reduce(
-    (acc, curr) => acc + curr.price,
-    0,
-  );
-  const pendingNext = appointmentsToday
-    .filter((e) => !e.attended && new Date(e.start as Date) > new Date())
-    .sort((a, b) =>
-      new Date(a.start as Date).getTime() - new Date(b.start as Date).getTime()
-    );
+  const { revenueToday, totalCitasHoy, pendingNext } = useMemo(() => {
+    const ahora = new Date();
+
+    const citasDeHoy = events.filter((e) => isToday(e.start as Date));
+
+    const revenue = citasDeHoy
+      .filter((e) => e.attended)
+      .reduce((acc, curr) => acc + curr.price, 0);
+
+    const proximos = citasDeHoy
+      .filter((e) => !e.attended)
+      .sort((a, b) =>
+        new Date(a.start as Date).getTime() -
+        new Date(b.start as Date).getTime()
+      );
+
+    return {
+      revenueToday: revenue,
+      totalCitasHoy: citasDeHoy.length,
+      pendingNext: proximos,
+    };
+  }, [events]);
 
   const handleClientSearch = async (query: string) => {
     setFormData({ ...formData, clientName: query });
@@ -223,7 +234,7 @@ function App() {
 
         <Sidebar
           revenue={revenueToday}
-          totalCitas={appointmentsToday.length}
+          totalCitas={totalCitasHoy}
           pendingNext={pendingNext}
           onSelectEvent={(e) => setSelectedEvent(e)}
           onSendWhatsApp={sendWhatsApp}
