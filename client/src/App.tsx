@@ -102,12 +102,14 @@ function App() {
 
       fetchAppointments();
     } catch (error: any) {
-      console.error("Error al guardar:", error.response?.data || error.message);
+      const errorData = error.response?.data;
 
-      if (error.response && error.response.data.error === "COLLISION") {
-        alert(`⚠️ ¡Conflicto de horario! \n${error.response.data.message}`);
+      if (errorData?.error === "PAST_DATE") {
+        alert(`🚫 ${errorData.message}`);
+      } else if (errorData?.error === "COLLISION") {
+        alert(`⚠️ ¡Conflicto! \n${errorData.message}`);
       } else {
-        alert("Ocurrió un error al guardar la cita. Revisa la consola (F12).");
+        alert("Ocurrió un error inesperado.");
       }
     }
   };
@@ -157,8 +159,27 @@ function App() {
             endAccessor="end"
             selectable
             onSelectSlot={(slot) => {
+              const ahora = new Date();
+
+              if (slot.start < ahora) {
+                alert("❌ No puedes agendar citas en el pasado.");
+                return;
+              }
+
               setSelectedSlot(slot);
               setShowForm(true);
+            }}
+            slotPropGetter={(date) => {
+              if (date < new Date()) {
+                return {
+                  style: {
+                    backgroundColor: "#f0f0f0",
+                    cursor: "not-allowed",
+                    opacity: 0.6,
+                  },
+                };
+              }
+              return {};
             }}
             onSelectEvent={(event) => setSelectedEvent(event as Appointment)}
             culture="es"

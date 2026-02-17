@@ -41,10 +41,26 @@ app.get("/clients/search", async (req, res) => {
 
 // 3. CREAR CITA (Con validación de choque y lógica de clientes)
 app.post("/appointments", async (req, res) => {
-  const { clientName, phoneNumber, start, end, serviceType, price, saveAsFrequent } = req.body;
+  const {
+    clientName,
+    phoneNumber,
+    start,
+    end,
+    serviceType,
+    price,
+    saveAsFrequent,
+  } = req.body;
 
   const isoStart = new Date(start);
   const isoEnd = new Date(end);
+  const ahora = new Date();
+
+  if (isoStart < ahora) {
+    return res.status(400).json({
+      error: "PAST_DATE",
+      message: "No se pueden crear citas en fechas u horarios pasados.",
+    });
+  }
 
   try {
     // A. VALIDACIÓN DE CHOQUE
@@ -52,15 +68,15 @@ app.post("/appointments", async (req, res) => {
       where: {
         AND: [
           { start: { lt: isoEnd } },
-          { end: { gt: isoStart } }
-        ]
-      }
+          { end: { gt: isoStart } },
+        ],
+      },
     });
 
     if (conflict) {
       return res.status(400).json({
         error: "COLLISION",
-        message: `El horario ya está ocupado por ${conflict.clientName}`
+        message: `El horario ya está ocupado por ${conflict.clientName}`,
       });
     }
 
@@ -85,8 +101,8 @@ app.post("/appointments", async (req, res) => {
         serviceType,
         price: Number(price),
         attended: false,
-        clientId: clientId // <--- Esto es vital para el historial
-      }
+        clientId: clientId, // <--- Esto es vital para el historial
+      },
     });
 
     res.json(appointment);
