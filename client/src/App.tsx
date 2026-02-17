@@ -82,20 +82,34 @@ function App() {
 
   const handleSaveAppointment = async () => {
     if (!selectedSlot) return;
-    await axios.post(`${API_URL}/appointments`, {
-      ...formData,
-      start: selectedSlot.start,
-      end: selectedSlot.end,
-    });
-    setShowForm(false);
-    setFormData({
-      clientName: "",
-      phoneNumber: "",
-      serviceType: "Básico",
-      price: 15,
-      saveAsFrequent: false,
-    });
-    fetchAppointments();
+
+    try {
+      await axios.post(`${API_URL}/appointments`, {
+        ...formData,
+        start: selectedSlot.start,
+        end: selectedSlot.end,
+      });
+
+      setShowForm(false);
+
+      setFormData({
+        clientName: "",
+        phoneNumber: "",
+        serviceType: "Básico",
+        price: 15,
+        saveAsFrequent: false,
+      });
+
+      fetchAppointments();
+    } catch (error: any) {
+      console.error("Error al guardar:", error.response?.data || error.message);
+
+      if (error.response && error.response.data.error === "COLLISION") {
+        alert(`⚠️ ¡Conflicto de horario! \n${error.response.data.message}`);
+      } else {
+        alert("Ocurrió un error al guardar la cita. Revisa la consola (F12).");
+      }
+    }
   };
 
   const sendWhatsApp = (event: Appointment) => {

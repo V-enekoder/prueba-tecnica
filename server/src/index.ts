@@ -20,7 +20,7 @@ app.get("/appointments", async (req, res) => {
   }
 });
 
-// 2. BUSCADOR DE CLIENTES (Para el autocompletado en el front)
+// 2. BUSCADOR DE CLIENTES
 app.get("/clients/search", async (req, res) => {
   const { q } = req.query;
   try {
@@ -39,61 +39,67 @@ app.get("/clients/search", async (req, res) => {
   }
 });
 
-// 3. CREAR CITA (Con lógica de Cliente Frecuente)
+// 3. CREAR CITA (Con validación de choque y lógica de clientes)
 app.post("/appointments", async (req, res) => {
-  const {
-    clientName,
-    phoneNumber,
-    start,
-    end,
-    serviceType,
-    price,
-    saveAsFrequent,
-  } = req.body;
+  const { clientName, phoneNumber, start, end, serviceType, price, saveAsFrequent } = req.body;
+
+  const isoStart = new Date(start);
+  const isoEnd = new Date(end);
 
   try {
-    let clientId: number | null = null;
+    // A. VALIDACIÓN DE CHOQUE
+    const conflict = await prisma.appointment.findFirst({
+      where: {
+        AND: [
+          { start: { lt: isoEnd } },
+          { end: { gt: isoStart } }
+        ]
+      }
+    });
 
-    // Si se marca como frecuente, crear o actualizar el cliente
+    if (conflict) {
+      return res.status(400).json({
+        error: "COLLISION",
+        message: `El horario ya está ocupado por ${conflict.clientName}`
+      });
+    }
+
+    // B. LÓGICA DE CLIENTE FRECUENTE
+    let clientId: number | null = null;
     if (saveAsFrequent && phoneNumber) {
       const client = await prisma.client.upsert({
         where: { phone: phoneNumber },
         update: { name: clientName },
-        create: {
-          name: clientName,
-          phone: phoneNumber,
-          isFrequent: true,
-        },
+        create: { name: clientName, phone: phoneNumber, isFrequent: true },
       });
       clientId = client.id;
     }
 
-    // Crear la cita vinculándola al clientId (si existe)
+    // C. CREAR CITA
     const appointment = await prisma.appointment.create({
       data: {
         clientName,
         phoneNumber,
-        start: new Date(start),
-        end: new Date(end),
+        start: isoStart,
+        end: isoEnd,
         serviceType,
         price: Number(price),
         attended: false,
-        clientId: clientId, // Relación con el cliente
-      },
+        clientId: clientId // <--- Esto es vital para el historial
+      }
     });
 
     res.json(appointment);
   } catch (error) {
     console.error(error);
-    res.status(400).json({ error: "Error al agendar la cita" });
+    res.status(500).json({ error: "INTERNAL_ERROR" });
   }
 });
 
-// 4. ACTUALIZAR CITA (Marcar asistencia, precio, etc.)
+// 4. ACTUALIZAR CITA
 app.patch("/appointments/:id", async (req, res) => {
   const { id } = req.params;
   const { attended, price, serviceType } = req.body;
-
   try {
     const updated = await prisma.appointment.update({
       where: { id: Number(id) },
