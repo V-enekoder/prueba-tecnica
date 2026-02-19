@@ -2,18 +2,22 @@ import {
   Clock,
   DollarSign,
   MessageCircle,
+  Search,
+  Sparkles, // <--- Añadido
   TrendingUp,
   Users,
 } from "lucide-react";
 import { format } from "date-fns";
 import type { Appointment } from "../types";
-import { ClientSearch } from "./ClientSearch.tsx";
-import "./Sidebar.css"; // <--- Importamos su propio CSS
+import { ClientSearch } from "./ClientSearch";
+import "./Sidebar.css";
 
 interface Props {
   revenue: number;
   totalCitas: number;
   pendingNext: Appointment[];
+  showPredictions: boolean;
+  onPredict: () => void;
   onSelectEvent: (event: Appointment) => void;
   onSendWhatsApp: (event: Appointment) => void;
 }
@@ -22,6 +26,8 @@ export const Sidebar = ({
   revenue,
   totalCitas,
   pendingNext,
+  showPredictions,
+  onPredict,
   onSelectEvent,
   onSendWhatsApp,
 }: Props) => {
@@ -59,6 +65,17 @@ export const Sidebar = ({
           </div>
         </div>
       </div>
+
+      {/* Botón de Predicción Mejorado */}
+      <button
+        className={`btn-predict ${showPredictions ? "active" : ""}`}
+        onClick={onPredict}
+      >
+        <Sparkles size={18} />
+        <span>
+          {showPredictions ? "Ocultar Predicciones" : "Predecir Demanda"}
+        </span>
+      </button>
 
       {/* Lista de Próximos Clientes */}
       <div className="agenda-section">

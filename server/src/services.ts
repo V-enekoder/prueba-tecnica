@@ -80,3 +80,51 @@ export const appointmentService = {
     });
   },
 };
+
+export const predictionService = {
+  async predictNextVisits() {
+    const clients = await prisma.client.findMany({
+      include: {
+        appointments: { where: { attended: true }, orderBy: { start: "asc" } },
+      },
+    });
+
+    const predictions: any[] = [];
+
+    clients.forEach((client) => {
+      const apts = client.appointments;
+      if (apts.length < 2) return;
+
+      const intervals: number[] = [];
+      for (let i = 1; i < apts.length; i++) {
+        const diff = apts[i].start.getTime() - apts[i - 1].start.getTime();
+        intervals.push(diff / (1000 * 60 * 60 * 24));
+      }
+
+      // 1. Calcular promedio de días entre citas
+      const avgInterval = intervals.reduce((a, b) => a + b, 0) /
+        intervals.length;
+
+      // 2. Tomar la fecha de la última cita
+      const lastApt = apts[apts.length - 1];
+      const nextDate = new Date(lastApt.start);
+      nextDate.setDate(nextDate.getDate() + Math.round(avgInterval));
+
+      // 3. Solo predecir si la fecha cae en el futuro
+      if (nextDate > new Date()) {
+        predictions.push({
+          id: `pred-${client.id}`,
+          clientName: `💡 Predicción: ${client.name}`,
+          start: nextDate,
+          end: new Date(new Date(nextDate).setHours(nextDate.getHours() + 1)),
+          serviceType: "PREDICCIÓN",
+          attended: false,
+          isPrediction: true,
+          price: 0,
+        });
+      }
+    });
+
+    return predictions;
+  },
+};

@@ -10,7 +10,7 @@ import { AppointmentDetails } from "./components/AppointmentDetails";
 import { Sidebar } from "./components/Sidebar";
 import { CustomToolbar } from "./components/CustomToolbar";
 import { Login } from "./components/Login";
-
+import { CSSProperties } from "react";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "./App.css";
 
@@ -148,9 +148,100 @@ function App() {
     );
   };
 
+  const [predictedEvents, setPredictedEvents] = useState<Appointment[]>([]);
+  const [showPredictions, setShowPredictions] = useState(false);
+
+  const handlePredict = async () => {
+    if (showPredictions) {
+      setPredictedEvents([]);
+      setShowPredictions(false);
+      return;
+    }
+
+    try {
+      console.log("Solicitando predicciones...");
+      const res = await axios.get(`${API_URL}/predict`);
+
+      console.log("Datos recibidos del server:", res.data);
+
+      if (res.data.length === 0) {
+        alert("No hay suficientes datos históricos para predecir visitas de clientes frecuentes.");
+        return;
+      }
+
+      const formatted = res.data.map((p: any) => ({
+        ...p,
+        start: new Date(p.start),
+        end: new Date(p.end),
+      }));
+
+      setPredictedEvents(formatted);
+      setShowPredictions(true);
+    } catch (error: any) {
+      console.error("Error en predicción:", error);
+      alert("Error al obtener predicciones. ¿Estás logueado?");
+    }
+  };
+
+  const allEvents = useMemo(() => [...events, ...predictedEvents], [
+    events,
+    predictedEvents,
+  ]);
+
   const [view, setView] = useState<View>("month");
 
   const [date, setDate] = useState(new Date());
+
+  const eventStyleGetter = (event: any): { style: CSSProperties } => {
+    // 1. ESTILO PARA PREDICCIONES
+    if (event.isPrediction) {
+      return {
+        style: {
+          backgroundColor: "rgba(49, 116, 173, 0.15)",
+          border: "2px dashed #3174ad",
+          color: "#3174ad",
+          opacity: 0.8,
+          // Usamos 'as const' para que TS sepa que es el valor literal "none"
+          pointerEvents: "none" as const,
+          borderRadius: "8px",
+          fontWeight: "bold",
+          fontStyle: "italic",
+        },
+      };
+    }
+
+    // 2. ESTILO PARA BLOQUEOS
+    if (event.type === "blocked") {
+      return {
+        style: {
+          backgroundColor: "#2c3e50",
+          backgroundImage:
+            "repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,.05) 10px, rgba(255,255,255,.05) 20px)",
+          border: "none",
+          color: "#95a5a6",
+          borderRadius: "6px",
+        },
+      };
+    }
+
+    // 3. ESTILO PARA CITAS NORMALES
+    let bg = "#3174ad";
+    if (event.serviceType === "Especial") bg = "#D4AF37";
+    if (event.serviceType === "Básico + Barba") bg = "#2E8B57";
+    if (!event.attended && event.start && new Date(event.start) < new Date()) {
+      bg = "#C0392B";
+    }
+    if (event.attended) bg = "#7F8C8D";
+
+    return {
+      style: {
+        backgroundColor: bg,
+        border: "none",
+        borderRadius: "6px",
+        color: "white",
+      },
+    };
+  };
 
   if (!isLoggedIn) {
     return <Login onLogin={() => setIsLoggedIn(true)} />;
@@ -178,12 +269,11 @@ function App() {
           <span className="dot red"></span> Pendiente
         </div>
       </header>
-
       <div className="dashboard-layout">
         <div className="calendar-container">
           <Calendar
             localizer={localizer}
-            events={events}
+            events={allEvents}
             view={view}
             onView={(newView) => setView(newView)}
             date={date}
@@ -235,22 +325,7 @@ function App() {
               showMore: (total) => `+ Ver más (${total})`,
             }}
             style={{ height: "100%" }}
-            eventPropGetter={(event: any) => {
-              let bg = "#3174ad";
-              if (event.serviceType === "Especial") bg = "#D4AF37";
-              if (event.serviceType === "Básico + Barba") bg = "#2E8B57";
-              if (!event.attended && new Date(event.start) < new Date()) {bg =
-                  "#C0392B";}
-              if (event.attended) bg = "#7F8C8D";
-              return {
-                style: {
-                  backgroundColor: bg,
-                  border: "none",
-                  borderRadius: "4px",
-                  color: "white",
-                },
-              };
-            }}
+            eventPropGetter={eventStyleGetter}
           />
         </div>
 
@@ -258,7 +333,9 @@ function App() {
           revenue={revenueToday}
           totalCitas={totalCitasHoy}
           pendingNext={pendingNext}
-          onSelectEvent={(e) => setSelectedEvent(e)}
+          showPredictions={showPredictions}
+          onPredict={handlePredict}           // <--- ESTO ES LO QUE ACTIVA EL BOTÓN
+          onSelectEvent={setSelectedEvent}     // <--- ESTO PERMITE CLICK EN LA LISTA
           onSendWhatsApp={sendWhatsApp}
         />
       </div>

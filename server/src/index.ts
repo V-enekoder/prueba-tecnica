@@ -1,6 +1,10 @@
 import express from "express";
 import cors from "cors";
-import { appointmentService, clientService } from "./services";
+import {
+  appointmentService,
+  clientService,
+  predictionService,
+} from "./services";
 import { prisma } from "./db";
 import { authService } from "./auth";
 import bcrypt from "bcryptjs";
@@ -181,6 +185,11 @@ app.get(
     }
   },
 );
+
+app.get("/predict", authService.authenticateToken, async (req, res) => {
+  const predictions = await predictionService.predictNextVisits();
+  res.json(predictions);
+});
 
 const PORT = 3001;
 app.listen(PORT, () => {
