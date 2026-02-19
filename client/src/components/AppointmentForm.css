@@ -247,3 +247,44 @@
     color: white;
     box-shadow: 0 4px 12px rgba(49, 116, 173, 0.3);
 }
+/* Selector de modo (Cita vs Bloqueo) */
+.mode-selector-container {
+    padding: 10px 24px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #eee;
+}
+
+.mode-selector {
+    display: flex;
+    background: #e9ecef;
+    padding: 4px;
+    border-radius: 12px;
+    gap: 4px;
+}
+
+.mode-selector button {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px;
+    border: none;
+    border-radius: 9px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    color: #666;
+    background: transparent;
+    transition: 0.2s;
+}
+
+.mode-selector button.active {
+    background: white;
+    color: #1a1a1a;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.mode-selector button:not(.active):hover {
+    background: rgba(0, 0, 0, 0.05);
+}

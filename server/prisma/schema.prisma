@@ -30,3 +30,10 @@ model Appointment {
   clientId Int?
   client   Client? @relation(fields: [clientId], references: [id])
 }
+
+model BlockedSlot {
+  id     Int      @id @default(autoincrement())
+  start  DateTime
+  end    DateTime
+  reason String?  // Ej: "Almuerzo", "Día Libre"
+}

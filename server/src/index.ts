@@ -8,12 +8,23 @@ app.use(express.json());
 
 app.get("/appointments", async (req, res) => {
   try {
-    const appointments = await prisma.appointment.findMany({
-      orderBy: { start: "asc" },
-    });
-    res.json(appointments);
+    const appointments = await prisma.appointment.findMany();
+    const blocked = await prisma.blockedSlot.findMany();
+
+    // Unimos ambos pero marcamos los bloqueos
+    const allEvents = [
+      ...appointments.map((a) => ({ ...a, type: "appointment" })),
+      ...blocked.map((b) => ({
+        ...b,
+        type: "blocked",
+        clientName: b.reason,
+        serviceType: "BLOQUEADO",
+      })),
+    ];
+
+    res.json(allEvents);
   } catch (error) {
-    res.status(500).json({ error: "Error al obtener citas" });
+    res.status(500).send(error);
   }
 });
 
@@ -42,6 +53,51 @@ app.get("/clients/search", async (req, res) => {
   }
 });
 
+app.post("/appointments", async (req, res) => {
+  const { isBlocked, reason, ...rest } = req.body;
+  const isoStart = new Date(req.body.start);
+  const isoEnd = new Date(req.body.end);
+
+  try {
+    // Validar colisión (siempre)
+    const conflict = await appointmentService.checkCollision(isoStart, isoEnd);
+    if (conflict) {
+      return res.status(400).json({
+        error: "COLLISION",
+        message: `Choque con ${conflict.type}: ${conflict.name}`,
+      });
+    }
+
+    if (isBlocked) {
+      // Es un bloqueo
+      const blocked = await appointmentService.createBlockedSlot(
+        isoStart,
+        isoEnd,
+        reason || "Bloqueado",
+      );
+      return res.json(blocked);
+    } else {
+      // Es una cita (lógica anterior)
+      const clientId = await clientService.handleFrequentClient(
+        rest.clientName,
+        rest.phoneNumber,
+        rest.saveAsFrequent,
+      );
+      const appointment = await appointmentService.createAppointment({
+        ...rest,
+        start: isoStart,
+        end: isoEnd,
+        clientId,
+        price: Number(rest.price),
+      });
+      return res.json(appointment);
+    }
+  } catch (error) {
+    res.status(500).json(error);
+  }
+});
+
+/*
 app.post("/appointments", async (req, res) => {
   const {
     clientName,
@@ -99,7 +155,7 @@ app.post("/appointments", async (req, res) => {
     res.status(500).json({ error: "INTERNAL_ERROR" });
   }
 });
-
+*/
 // 4. ACTUALIZAR CITA
 app.patch("/appointments/:id", async (req, res) => {
   const { id } = req.params;
