@@ -1,3 +1,5 @@
+//No se gurdan los clientes en la bd
+
 import { useEffect, useState } from "react";
 import { Calendar, dateFnsLocalizer, type View } from "react-big-calendar";
 import { format, getDay, isToday, parse, startOfWeek } from "date-fns";

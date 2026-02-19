@@ -1,0 +1,182 @@
+.sidebar-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    height: 100%;
+    padding-right: 5px;
+}
+
+/* Tarjeta de Estadísticas */
+.stats-dashboard {
+    background: #1a1a1a;
+    color: white;
+    padding: 24px;
+    border-radius: 24px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.stats-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    opacity: 0.5;
+    margin-bottom: 20px;
+}
+
+.main-stat {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.stat-icon-bg {
+    background: rgba(46, 204, 113, 0.2);
+    color: #2ecc71;
+    padding: 12px;
+    border-radius: 14px;
+}
+
+.stat-content p {
+    margin: 0;
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
+
+.revenue-text {
+    font-size: 2.2rem;
+    font-weight: 900;
+    color: #2ecc71;
+}
+
+.secondary-stats {
+    display: flex;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 15px;
+}
+
+.sec-stat-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sec-stat-item strong {
+    font-size: 1.1rem;
+    display: block;
+}
+
+.sec-stat-item p {
+    margin: 0;
+    font-size: 0.7rem;
+    opacity: 0.5;
+}
+
+/* Sección de Agenda */
+.agenda-section {
+    flex: 1;
+    background: white;
+    border-radius: 24px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    min-height: 0;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.section-title h3 {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.scroll-area {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+/* Tarjeta de Cita Individual */
+.appointment-card-mini {
+    background: #f8f9fa;
+    border-radius: 16px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.appointment-card-mini:hover {
+    background: white;
+    border-color: #3174ad;
+    transform: translateX(5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.time-badge {
+    background: #3174ad;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 800;
+}
+
+.client-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.client-details .name {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: #333;
+}
+
+.client-details .service {
+    font-size: 0.75rem;
+    color: #888;
+}
+
+.whatsapp-quick-btn {
+    background: #25d366;
+    color: white;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.whatsapp-quick-btn:hover {
+    transform: scale(1.1);
+    background: #1eb954;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #bbb;
+    font-size: 0.85rem;
+}

@@ -1,14 +1,11 @@
 import express from "express";
 import cors from "cors";
-import { PrismaClient } from "@prisma/client";
-
+import { appointmentService, clientService } from "./services";
+import { prisma } from "./db";
 const app = express();
-const prisma = new PrismaClient();
-
 app.use(cors());
 app.use(express.json());
 
-// 1. OBTENER TODAS LAS CITAS
 app.get("/appointments", async (req, res) => {
   try {
     const appointments = await prisma.appointment.findMany({
@@ -23,6 +20,11 @@ app.get("/appointments", async (req, res) => {
 // 2. BUSCADOR DE CLIENTES
 app.get("/clients/search", async (req, res) => {
   const { q } = req.query;
+
+  if (!q || String(q).length < 2) {
+    return res.json([]);
+  }
+
   try {
     const clients = await prisma.client.findMany({
       where: {
@@ -35,11 +37,11 @@ app.get("/clients/search", async (req, res) => {
     });
     res.json(clients);
   } catch (error) {
+    console.error("Error en búsqueda:", error);
     res.status(500).json({ error: "Error en la búsqueda" });
   }
 });
 
-// 3. CREAR CITA (Con validación de choque y lógica de clientes)
 app.post("/appointments", async (req, res) => {
   const {
     clientName,
@@ -55,54 +57,40 @@ app.post("/appointments", async (req, res) => {
   const isoEnd = new Date(end);
   const ahora = new Date();
 
+  // 1. Validaciones previas
   if (isoStart < ahora) {
     return res.status(400).json({
       error: "PAST_DATE",
-      message: "No se pueden crear citas en fechas u horarios pasados.",
+      message: "No puedes agendar en el pasado.",
     });
   }
 
   try {
-    // A. VALIDACIÓN DE CHOQUE
-    const conflict = await prisma.appointment.findFirst({
-      where: {
-        AND: [
-          { start: { lt: isoEnd } },
-          { end: { gt: isoStart } },
-        ],
-      },
-    });
-
+    // 2. Comprobar colisiones
+    const conflict = await appointmentService.checkCollision(isoStart, isoEnd);
     if (conflict) {
       return res.status(400).json({
         error: "COLLISION",
-        message: `El horario ya está ocupado por ${conflict.clientName}`,
+        message: `Horario ocupado por ${conflict.clientName}`,
       });
     }
 
-    // B. LÓGICA DE CLIENTE FRECUENTE
-    let clientId: number | null = null;
-    if (saveAsFrequent && phoneNumber) {
-      const client = await prisma.client.upsert({
-        where: { phone: phoneNumber },
-        update: { name: clientName },
-        create: { name: clientName, phone: phoneNumber, isFrequent: true },
-      });
-      clientId = client.id;
-    }
+    // 3. Procesar Cliente (Función externa)
+    const clientId = await clientService.handleFrequentClient(
+      clientName,
+      phoneNumber,
+      saveAsFrequent,
+    );
 
-    // C. CREAR CITA
-    const appointment = await prisma.appointment.create({
-      data: {
-        clientName,
-        phoneNumber,
-        start: isoStart,
-        end: isoEnd,
-        serviceType,
-        price: Number(price),
-        attended: false,
-        clientId: clientId, // <--- Esto es vital para el historial
-      },
+    // 4. Crear Cita (Función externa)
+    const appointment = await appointmentService.createAppointment({
+      clientName,
+      phoneNumber,
+      start: isoStart,
+      end: isoEnd,
+      serviceType,
+      price,
+      clientId,
     });
 
     res.json(appointment);
