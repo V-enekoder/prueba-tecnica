@@ -1,17 +1,15 @@
-//No se gurdan los clientes en la bd
-
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Calendar, dateFnsLocalizer, type View } from "react-big-calendar";
 import { format, getDay, isToday, parse, startOfWeek } from "date-fns";
 import esES from "date-fns/locale/es";
 import axios from "axios";
-import { useMemo } from "react";
 
 import type { Appointment } from "./types";
 import { AppointmentForm } from "./components/AppointmentForm";
 import { AppointmentDetails } from "./components/AppointmentDetails";
 import { Sidebar } from "./components/Sidebar";
 import { CustomToolbar } from "./components/CustomToolbar";
+import { Login } from "./components/Login";
 
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "./App.css";
@@ -25,6 +23,14 @@ const localizer = dateFnsLocalizer({
   locales,
 });
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
+
+axios.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
 function App() {
   const [events, setEvents] = useState<Appointment[]>([]);
@@ -41,6 +47,8 @@ function App() {
     price: 15,
     saveAsFrequent: false,
   });
+
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
 
   useEffect(() => {
     fetchAppointments();
@@ -144,8 +152,20 @@ function App() {
 
   const [date, setDate] = useState(new Date());
 
+  if (!isLoggedIn) {
+    return <Login onLogin={() => setIsLoggedIn(true)} />;
+  }
+
   return (
     <div className="app-container">
+      <button
+        onClick={() => {
+          localStorage.removeItem("token");
+          setIsLoggedIn(false);
+        }}
+      >
+        Cerrar Sesión
+      </button>
       <header className="main-header">
         <div className="logo">
           <h1>
