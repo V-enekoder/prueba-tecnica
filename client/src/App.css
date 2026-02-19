@@ -226,3 +226,50 @@ body {
     cursor: pointer;
     font-weight: bold;
 }
+
+.photo-container {
+    width: 100%;
+    height: 200px;
+    background: #f1f3f5;
+    border-radius: 16px;
+    margin-bottom: 20px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed #e0e0e0;
+}
+
+.ref-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Ajusta la foto sin deformarla */
+}
+
+.no-photo {
+    text-align: center;
+    color: #adb5bd;
+}
+
+.no-photo p {
+    font-size: 0.8rem;
+    margin-top: 8px;
+}
+
+.btn-photo {
+    background: #6c757d;
+    color: white;
+    padding: 12px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.2s;
+}
+
+.btn-photo:hover {
+    background: #5a6268;
+}

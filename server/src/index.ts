@@ -6,6 +6,8 @@ import { authService } from "./auth";
 import bcrypt from "bcryptjs";
 
 const app = express();
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ limit: "10mb", extended: true }));
 app.use(cors());
 app.use(express.json());
 
@@ -131,7 +133,7 @@ app.patch(
   authService.authenticateToken,
   async (req, res) => {
     const { id } = req.params;
-    const { attended, price, serviceType } = req.body;
+    const { attended, price, serviceType, referencePhoto } = req.body;
     try {
       const updated = await prisma.appointment.update({
         where: { id: Number(id) },
@@ -139,6 +141,7 @@ app.patch(
           attended: attended !== undefined ? Boolean(attended) : undefined,
           price: price !== undefined ? Number(price) : undefined,
           serviceType: serviceType || undefined,
+          referencePhoto: referencePhoto || undefined, // <--- SOPORTE PARA FOTO
         },
       });
       res.json(updated);

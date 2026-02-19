@@ -52,13 +52,31 @@ export const appointmentService = {
   },
 
   async createAppointment(data: any) {
-    return await prisma.appointment.create({ data });
+    return await prisma.appointment.create({
+      data: {
+        clientName: data.clientName,
+        phoneNumber: data.phoneNumber,
+        start: data.start,
+        end: data.end,
+        serviceType: data.serviceType,
+        price: Number(data.price),
+        attended: false,
+        clientId: data.clientId,
+        referencePhoto: data.referencePhoto || null,
+      },
+    });
   },
 
   // Nuevo: Crear bloqueo
   async createBlockedSlot(start: Date, end: Date, reason: string) {
     return await prisma.blockedSlot.create({
       data: { start, end, reason },
+    });
+  },
+  async updatePhoto(id: number, photoBase64: string) {
+    return await prisma.appointment.update({
+      where: { id },
+      data: { referencePhoto: photoBase64 },
     });
   },
 };
