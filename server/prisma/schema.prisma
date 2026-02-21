@@ -10,7 +10,8 @@ datasource db {
 model Client {
   id           Int           @id @default(autoincrement())
   name         String
-  phone        String        @unique // El teléfono identifica al cliente frecuente
+  phone        String        @unique
+  dni          String?       @unique
   isFrequent   Boolean       @default(true)
   appointments Appointment[]
   createdAt    DateTime      @default(now())

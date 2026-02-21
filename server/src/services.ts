@@ -128,3 +128,47 @@ export const predictionService = {
     return predictions;
   },
 };
+
+export const analyticsService = {
+  async getBusinessStats() {
+    const ahora = new Date();
+    const mesActual = ahora.getMonth();
+    const añoActual = ahora.getFullYear();
+
+    const allAppointments = await prisma.appointment.findMany({
+      where: { attended: true },
+    });
+
+    // 1. Ganancias por tipo de servicio
+    const statsByService = allAppointments.reduce((acc: any, curr) => {
+      acc[curr.serviceType] = (acc[curr.serviceType] || 0) + curr.price;
+      return acc;
+    }, {});
+
+    // 2. Ingresos de este mes
+    const revenueThisMonth = allAppointments
+      .filter((a) =>
+        a.start.getMonth() === mesActual && a.start.getFullYear() === añoActual
+      )
+      .reduce((acc, curr) => acc + curr.price, 0);
+
+    // 3. Clientes más fieles (Top 3)
+    const clientCounts = allAppointments.reduce((acc: any, curr) => {
+      if (curr.clientName) {
+        acc[curr.clientName] = (acc[curr.clientName] || 0) + 1;
+      }
+      return acc;
+    }, {});
+
+    const topClients = Object.entries(clientCounts)
+      .sort(([, a]: any, [, b]: any) => b - a)
+      .slice(0, 3);
+
+    return {
+      statsByService,
+      revenueThisMonth,
+      topClients,
+      totalAppointments: allAppointments.length,
+    };
+  },
+};

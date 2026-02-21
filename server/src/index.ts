@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import {
+  analyticsService,
   appointmentService,
   clientService,
   predictionService,
@@ -79,9 +80,11 @@ app.get("/clients/search", authService.authenticateToken, async (req, res) => {
   try {
     const clients = await prisma.client.findMany({
       where: {
-        OR: [{ name: { contains: String(q) } }, {
-          phone: { contains: String(q) },
-        }],
+        OR: [
+          { name: { contains: String(q) } },
+          { phone: { contains: String(q) } },
+          { dni: { contains: String(q) } },
+        ],
       },
       take: 5,
     });
@@ -189,6 +192,16 @@ app.get(
 app.get("/predict", authService.authenticateToken, async (req, res) => {
   const predictions = await predictionService.predictNextVisits();
   res.json(predictions);
+});
+
+app.get("/analytics", authService.authenticateToken, async (req, res) => {
+  try {
+    const stats = await analyticsService.getBusinessStats();
+    res.json(stats);
+  } catch (error) {
+    console.error("Error en analytics:", error);
+    res.status(500).json({ error: "Error al calcular estadísticas" });
+  }
 });
 
 const PORT = 3001;

@@ -10,6 +10,7 @@ import { AppointmentDetails } from "./components/AppointmentDetails";
 import { Sidebar } from "./components/Sidebar";
 import { CustomToolbar } from "./components/CustomToolbar";
 import { Login } from "./components/Login";
+import { Analytics } from "./components/Analytics.tsx";
 import { CSSProperties } from "react";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "./App.css";
@@ -47,7 +48,7 @@ function App() {
     price: 15,
     saveAsFrequent: false,
   });
-
+  const [showAnalytics, setShowAnalytics] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
 
   useEffect(() => {
@@ -165,7 +166,9 @@ function App() {
       console.log("Datos recibidos del server:", res.data);
 
       if (res.data.length === 0) {
-        alert("No hay suficientes datos históricos para predecir visitas de clientes frecuentes.");
+        alert(
+          "No hay suficientes datos históricos para predecir visitas de clientes frecuentes.",
+        );
         return;
       }
 
@@ -334,8 +337,9 @@ function App() {
           totalCitas={totalCitasHoy}
           pendingNext={pendingNext}
           showPredictions={showPredictions}
-          onPredict={handlePredict}           // <--- ESTO ES LO QUE ACTIVA EL BOTÓN
-          onSelectEvent={setSelectedEvent}     // <--- ESTO PERMITE CLICK EN LA LISTA
+          onPredict={handlePredict}
+          onViewAnalytics={() => setShowAnalytics(true)}
+          onSelectEvent={setSelectedEvent}
           onSendWhatsApp={sendWhatsApp}
         />
       </div>
@@ -359,7 +363,7 @@ function App() {
           onClose={() => setShowForm(false)}
         />
       )}
-
+      {showAnalytics && <Analytics onClose={() => setShowAnalytics(false)} />}
       {selectedEvent && (
         <AppointmentDetails
           event={selectedEvent}

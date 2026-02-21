@@ -1,8 +1,8 @@
 import {
+  BarChart3,
   Clock,
   DollarSign,
   MessageCircle,
-  Search,
   Sparkles, // <--- Añadido
   TrendingUp,
   Users,
@@ -18,6 +18,7 @@ interface Props {
   pendingNext: Appointment[];
   showPredictions: boolean;
   onPredict: () => void;
+  onViewAnalytics: () => void;
   onSelectEvent: (event: Appointment) => void;
   onSendWhatsApp: (event: Appointment) => void;
 }
@@ -28,6 +29,7 @@ export const Sidebar = ({
   pendingNext,
   showPredictions,
   onPredict,
+  onViewAnalytics,
   onSelectEvent,
   onSendWhatsApp,
 }: Props) => {
@@ -75,6 +77,10 @@ export const Sidebar = ({
         <span>
           {showPredictions ? "Ocultar Predicciones" : "Predecir Demanda"}
         </span>
+      </button>
+      <button className="btn-analytics" onClick={onViewAnalytics}>
+        <BarChart3 size={18} />
+        <span>Estadísticas</span>
       </button>
 
       {/* Lista de Próximos Clientes */}

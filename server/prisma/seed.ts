@@ -62,11 +62,12 @@ async function main() {
 
     // Intervalo base del cliente: Algunos vienen cada semana (7), otros cada mes (30)
     const baseInterval = Math.floor(Math.random() * 25) + 7;
-
+    const dni = `${Math.floor(10000000 + Math.random() * 20000000)}`;
     const client = await prisma.client.create({
       data: {
         name,
         phone,
+        dni,
         isFrequent: true,
       },
     });

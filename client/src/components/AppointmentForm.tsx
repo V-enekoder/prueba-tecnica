@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   DollarSign,
+  IdCard, // Nuevo icono para la cédula
   Phone,
   Plus,
   Scissors,
@@ -141,7 +142,10 @@ export const AppointmentForm = ({
                             <Search size={14} />
                             <div className="suggestion-info">
                               <span className="s-name">{c.name}</span>
-                              <span className="s-phone">{c.phone}</span>
+                              <span className="s-phone">📞 {c.phone}</span>
+                              {c.dni && (
+                                <span className="s-phone">🆔 {c.dni}</span>
+                              )}
                             </div>
                           </li>
                         ))}
@@ -150,18 +154,36 @@ export const AppointmentForm = ({
                   </div>
                 </div>
 
-                <div className="input-group">
-                  <label>
-                    <Phone size={16} /> Teléfono de contacto
-                  </label>
-                  <input
-                    type="tel"
-                    className="main-input"
-                    placeholder="Ej: 0412 1234567"
-                    value={formData.phoneNumber || ""}
-                    onChange={(e) =>
-                      setFormData({ ...formData, phoneNumber: e.target.value })}
-                  />
+                <div className="form-row">
+                  <div className="input-group flex-2">
+                    <label>
+                      <Phone size={16} /> Teléfono
+                    </label>
+                    <input
+                      type="tel"
+                      className="main-input"
+                      placeholder="0412..."
+                      value={formData.phoneNumber || ""}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          phoneNumber: e.target.value,
+                        })}
+                    />
+                  </div>
+                  <div className="input-group flex-2">
+                    <label>
+                      <IdCard size={16} /> Cédula (Opcional)
+                    </label>
+                    <input
+                      type="text"
+                      className="main-input"
+                      placeholder="V-..."
+                      value={formData.dni || ""}
+                      onChange={(e) =>
+                        setFormData({ ...formData, dni: e.target.value })}
+                    />
+                  </div>
                 </div>
 
                 <div className="form-row">
@@ -172,11 +194,10 @@ export const AppointmentForm = ({
                     <select
                       className="main-input"
                       value={formData.serviceType}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          serviceType: e.target.value,
-                        })}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        serviceType: e.target.value,
+                      })}
                     >
                       <option value="Básico">Corte Básico</option>
                       <option value="Básico + Barba">Básico + Barba</option>
