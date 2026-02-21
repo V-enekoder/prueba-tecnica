@@ -3,7 +3,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import type { ToolbarProps, View } from "react-big-calendar";
+import type { ToolbarProps } from "react-big-calendar";
 import type { Appointment } from "../types";
 import "./CustomToolbar.css";
 

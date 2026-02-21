@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Calendar, dateFnsLocalizer, type View } from "react-big-calendar";
 import { format, getDay, isToday, parse, startOfWeek } from "date-fns";
-import esES from "date-fns/locale/es";
+import { es } from "date-fns/locale";
 import axios from "axios";
 
 import type { Appointment } from "./types";
@@ -11,11 +11,11 @@ import { Sidebar } from "./components/Sidebar";
 import { CustomToolbar } from "./components/CustomToolbar";
 import { Login } from "./components/Login";
 import { Analytics } from "./components/Analytics.tsx";
-import { CSSProperties } from "react";
+import type { CSSProperties } from "react";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "./App.css";
 
-const locales = { es: esES };
+const locales = { es: es };
 const localizer = dateFnsLocalizer({
   format,
   parse,
@@ -68,8 +68,6 @@ function App() {
   };
 
   const { revenueToday, totalCitasHoy, pendingNext } = useMemo(() => {
-    const ahora = new Date();
-
     const citasDeHoy = events.filter((e) => isToday(e.start as Date));
 
     const revenue = citasDeHoy
@@ -160,7 +158,6 @@ function App() {
     }
 
     try {
-      console.log("Solicitando predicciones...");
       const res = await axios.get(`${API_URL}/predict`);
 
       console.log("Datos recibidos del server:", res.data);
@@ -181,7 +178,6 @@ function App() {
       setPredictedEvents(formatted);
       setShowPredictions(true);
     } catch (error: any) {
-      console.error("Error en predicción:", error);
       alert("Error al obtener predicciones. ¿Estás logueado?");
     }
   };
@@ -196,7 +192,6 @@ function App() {
   const [date, setDate] = useState(new Date());
 
   const eventStyleGetter = (event: any): { style: CSSProperties } => {
-    // 1. ESTILO PARA PREDICCIONES
     if (event.isPrediction) {
       return {
         style: {
@@ -204,7 +199,6 @@ function App() {
           border: "2px dashed #3174ad",
           color: "#3174ad",
           opacity: 0.8,
-          // Usamos 'as const' para que TS sepa que es el valor literal "none"
           pointerEvents: "none" as const,
           borderRadius: "8px",
           fontWeight: "bold",
@@ -213,7 +207,6 @@ function App() {
       };
     }
 
-    // 2. ESTILO PARA BLOQUEOS
     if (event.type === "blocked") {
       return {
         style: {
@@ -227,7 +220,6 @@ function App() {
       };
     }
 
-    // 3. ESTILO PARA CITAS NORMALES
     let bg = "#3174ad";
     if (event.serviceType === "Especial") bg = "#D4AF37";
     if (event.serviceType === "Básico + Barba") bg = "#2E8B57";
@@ -369,14 +361,14 @@ function App() {
           event={selectedEvent}
           onClose={() => setSelectedEvent(null)}
           onSendWhatsApp={sendWhatsApp}
-          onDelete={async (id) => {
+          onDelete={async (id: number) => {
             if (confirm("¿Borrar cita?")) {
               await axios.delete(`${API_URL}/appointments/${id}`);
               setSelectedEvent(null);
               fetchAppointments();
             }
           }}
-          onToggleAttended={async (event) => {
+          onToggleAttended={async (event: Appointment) => {
             await axios.patch(`${API_URL}/appointments/${event.id}`, {
               attended: !event.attended,
             });
