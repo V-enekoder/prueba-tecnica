@@ -11,5 +11,6 @@
     "skipLibCheck": true,
     "verbatimModuleSyntax": false,
   },
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "prisma/seed.ts"],
 }
