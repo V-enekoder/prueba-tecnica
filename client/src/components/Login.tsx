@@ -10,11 +10,9 @@ export const Login = ({ onLogin }: { onLogin: () => void }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
     try {
-      const res = await axios.post("http://localhost:3001/login", {
-        username,
-        password,
-      });
+      const res = await axios.post(`${API_URL}/login`, { username, password });
       localStorage.setItem("token", res.data.token);
       onLogin();
     } catch (err) {
